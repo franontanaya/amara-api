@@ -1,0 +1,19 @@
+{
+    "name": "franontanaya/amara-api",
+    "description": "PHP component to interact with Amara's API",
+    "license": "GPLv3",
+    "keywords": ["API"],
+    "authors": [
+        {
+            "name": "Fran Ontanaya",
+            "email": "email@franontanaya.org"
+        }
+    ],
+    "require": {},
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "FranOntanaya\\Amara\\": "src/"
+        }
+    }
+}
