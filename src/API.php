@@ -10,11 +10,11 @@ namespace FranOntanaya/Amara;
  * @author Fran Ontanaya
  * @copyright 2017 Fran Ontanaya
  * @license GPLv3
- * @version 0.12.1
+ * @version 0.12.2
  *
  */
 class API {
-    const VERSION = '0.12.1';
+    const VERSION = '0.12.2';
 
     /**
      * Credentials
@@ -1150,7 +1150,7 @@ class API {
        );
         $query = array(
             'format' => isset($r['format']) ? $r['format'] : 0,
-            'version' => isset($r['version']) ? $r['version'] : 0
+            'version_number' => isset($r['version_number']) ? $r['version_number'] : null
        );
        return $this->getResource($res, $query);
     }
