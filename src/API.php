@@ -901,7 +901,7 @@ class API {
         $res = array(
             'resource' => 'video_activities',
             'content_type' => 'json',
-            'video' => isset($r['video_id']) ? $r['video_id'] : null,
+            'video_id' => isset($r['video_id']) ? $r['video_id'] : null,
         );
         $query = array(
             'type' => isset($r['type']) ? $r['type'] : null,
