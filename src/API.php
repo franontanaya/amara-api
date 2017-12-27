@@ -1,5 +1,5 @@
 <?php
-namespace AmaraPHP;
+namespace FranOntanaya\Amara;
 
 /**
  * Amara API component
