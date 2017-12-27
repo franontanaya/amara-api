@@ -1131,14 +1131,15 @@ class API {
     function createRequest(array $r) {
         $res = array(
             'resource' => 'subtitle_requests',
-            'content_type' => 'json'
+            'content_type' => 'json',
+            'team' => $r['team']
         );
         $query = array();
         $data = array(
             'video' => $r['video_id'],
             'language' => $r['language_code'],
-            'team' => $r['team']
         );
+        if (isset($r['work_team'])) { $data['team'] = $r['work_team']; }
         if (isset($r['evaluation_teams'])) { $data['evaluation_teams'] = $r['evaluation_teams']; }
         return $this->createResource($res, $query, $data);
     }
@@ -1167,6 +1168,8 @@ class API {
         if (isset($r['reviewer'])) { $data['reviewer'] = $r['reviewer']; }
         if (isset($r['approver'])) { $data['approver'] = $r['approver']; }
         if (isset($r['state'])) { $data['state'] = $r['state']; }
+        if (isset($r['work_team'])) { $data['team'] = $r['work_team']; }
+        if (isset($r['evaluation_teams'])) { $data['evaluation_teams'] = $r['evaluation_teams']; }
         return $this->setResource($res, $query, $data);
     }
 
