@@ -1,5 +1,5 @@
 <?php
-namespace AmaraPHP;
+namespace FranOntanaya\Amara;
 
 /**
  * Amara API component
@@ -8,13 +8,13 @@ namespace AmaraPHP;
  * with Amara.org's API.
  *
  * @author Fran Ontanaya
- * @copyright 2017 Fran Ontanaya
+ * @copyright 2018 Fran Ontanaya
  * @license GPLv3
- * @version 0.14.0
+ * @version 0.16.1
  *
  */
 class API {
-    const VERSION = '0.14.0';
+    const VERSION = '0.16.1';
 
     /**
      * Credentials
@@ -239,6 +239,9 @@ class API {
             case 'users':
                 $url = "{$this->host}users/{$r['user']}/";
                 break;
+            case 'user_activities':
+                $url = "{$this->host}users/{$r['user']}/activities/";
+                break;
             case 'applications':
                 $url = "{$this->host}teams/{$r['team']}/applications/";
                 break;
@@ -253,6 +256,9 @@ class API {
                 break;
             case 'subtitle_request':
                 $url = "{$this->host}teams/{$r['team']}/subtitle-requests/{$r['job_id']}/";
+                break;
+            case 'pro_requests':
+                $url = "{$this->host}teams/{$r['team']}/pro-requests/";
                 break;
             default:
                 return null;
@@ -1100,7 +1106,14 @@ class API {
             'assignee' => isset($r['assignee']) ? $r['assignee'] : null,
             'type' => isset($r['type']) ? $r['type'] : null,
         );
-        return $this->getResource($res, $query);
+        $filter = null;
+        if (isset($r['filter'])) {
+            if (!is_callable($r['filter'])) {
+                throw new \UnexpectedValueException('The \'filter\' argument is not a callable function.');
+            }
+            $filter = $r['filter'];
+        };
+        return $this->getResource($res, $query, null, $filter);
     }
 
     /**
@@ -1173,6 +1186,34 @@ class API {
         return $this->setResource($res, $query, $data);
     }
 
+    // PRO REQUESTS RESOURCE
+    /**
+     * Post a new pro request
+     *
+     * For enterprise teams with pro requests enabled.
+     *
+     * The list of valid languages can be shorter than for regular collaborations.
+     * API will reply "Professional Service Request Invalid" on unavailable language codes.
+     *
+     * @since 0.15.0
+     */
+    function createProRequest(array $r) {
+        if (!$this->isValidVideoID($r['video_id'])) { return null; }
+        $res = array(
+            'resource' => 'pro_requests',
+            'team' => $r['team'],
+            'content_type' => 'json',
+        );
+        $query = array();
+        $data = array(
+            'video_id' => $r['video_id'],
+            'language_code' => $r['language_code'],
+            'quality_tier' => $r['quality'],
+            'turnaround_time' => $r['turnaround'],
+        );
+        return $this->createResource($res, $query, $data);
+    }
+
     // SUBTITLES RESOURCE
     // https://amara.readthedocs.io/en/latest/api.html#subtitles-resource
 
@@ -1180,8 +1221,6 @@ class API {
      * Fetch the subtitle track
      *
      * Specifying the version is needed to retrieve unpublished subtitles
-     * You may pass $lang_info if you retrieved it previously, or any
-     * variable to store it afterwards
      *
      * If you don't specify the format, you'll get Amara's internal
      * subtitle object. You can use it in your code instead of
@@ -1189,23 +1228,10 @@ class API {
      *
      * @since 0.1.0
      * @param array $r
-     * @param null $lang_info
      * @return array|mixed|null
      */
-    function getSubtitle(array $r, &$lang_info = null) {
+    function getSubtitle(array $r) {
         if (!$this->isValidVideoID($r['video_id'])) { return null; }
-/*
-        if (!isset($r['version'])) {
-            if ($lang_info === null) {
-                $lang_info = $this->getVideoLanguage(array(
-                    'video_id' => $r['video_id'],
-                    'language_code' => $r['language_code']
-               ));
-            }
-            $r['version'] = $this->getLastVersion($lang_info);
-        }
-        if ($r['version'] === null) { return null; }
-*/
         $res = array(
             'resource' => 'subtitles',
             'video_id' => $r['video_id'],
@@ -1261,10 +1287,15 @@ class API {
         $data = array(
             'subtitles' => isset($r['subtitles']) ? $r['subtitles'] : null,
             'sub_format' => isset($r['sub_format']) ? $r['sub_format'] : null,
-            'title' => isset($r['title']) ? $r['title'] : $lang_info->title,
-            'description' => isset($r['description']) ? $r['description'] : $lang_info->description,
-            'is_complete' => isset($r['complete']) ? $r['complete'] : null
+            'is_complete' => isset($r['complete']) ? $r['complete'] : null,
         );
+        if (isset($r['title'])) {
+            $data['title'] = isset($r['title']) ? $r['title'] : $lang_info->title;
+        }
+        if (isset($r['description'])) {
+            $data['description'] = isset($r['description']) ? $r['description'] : $lang_info->description;
+        }
+        if (isset($r['action'])) { $data['action'] = $r['action']; }
         return $this->createResource($res, $query, $data);
     }
 
@@ -1424,6 +1455,23 @@ class API {
             $result[$i] = $user;
         }
         return $result;
+    }
+
+    /**
+     * Returns list of activities for a given user
+     *
+     * @since 0.16.0
+     * @param array $r
+     * @return array|mixed
+     */
+    function getUserActivities(array $r) {
+        $res = array(
+            'resource' => 'users',
+            'content_type' => 'json',
+            'user' => $r['user'],
+            'type'=> $r['type'],
+        );
+        return $this->getResource($res);
     }
 
     // TEAM APPLICATIONS
