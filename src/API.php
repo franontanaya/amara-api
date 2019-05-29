@@ -10,7 +10,7 @@ namespace FranOntanaya\Amara;
  * @author Fran Ontanaya
  * @copyright 2018 Fran Ontanaya
  * @license GPLv3
- * @version 0.16.1
+ * @version 0.16.2
  *
  */
 class API {
@@ -19,7 +19,8 @@ class API {
     /**
      * Credentials
      *
-     * APIVersion: key - value pair to add to the GET request, e.g. apifuture=>20161201
+     * APIVersion: header to add to the request to use future API versions,
+     * e.g. X-API-FUTURE: 20190619
      *
      * @since 0.1.0
      */
@@ -55,9 +56,8 @@ class API {
      * @param $user
      * @param $APIKey
      */
-    function __construct($host, $user, $APIKey, $APIVersion = null, $logger = null) {
-        $this->setAccount($host, $user, $APIKey);
-        $this->setAPIVersion($APIVersion);
+    function __construct($host, $user, $APIKey, string $APIVersion = '', $logger = null) {
+        $this->setAccount($host, $user, $APIKey, $APIVersion);
         $this->setLogger($logger);
     }
 
@@ -70,7 +70,7 @@ class API {
      * @param $APIKey
      * @throws \InvalidAPIAccount
      */
-    function setAccount($host, $user, $APIKey, array $APIVersion = []) {
+    function setAccount($host, $user, $APIKey, string $APIVersion = '') {
         $this->validateAccount($host, $user, $APIKey);
         if ($this->host !== $host && $this->APIKey === $APIKey) {
             $this->throwException(
@@ -87,10 +87,12 @@ class API {
                 'API key should be the same when changing usernames'
             );
         }
-        $this->setAPIVersion($APIVersion);
+        $this->host = $host;
         $this->user = $user;
         $this->APIKey = $APIKey;
-        $this->host = $host;
+        if ($APIVersion !== '') {
+            $this->setAPIVersion($APIVersion);
+        }
     }
 
 
@@ -100,22 +102,14 @@ class API {
      * @param array $APIVersion
      * @return bool
      */
-    function setAPIVersion($APIVersion) {
+    function setAPIVersion(string $APIVersion) {
         if (empty($APIVersion)) { return false; }
-        if (count($APIVersion) > 1) {
+        if (preg_match('/[^A-Za-z0-9\-_]/', $APIVersion)) {
             $this->throwException(
                 'InvalidAPISettings',
                 __METHOD__,
-                'Too many elements passed for the API Version',
-                'API Version should be one key-value pair or nothing'
-            );
-        }
-        if (!is_string(array_keys($APIVersion))) {
-            $this->throwException(
-                'InvalidAPISettings',
-                __METHOD__,
-                'API Version key is not a string',
-                'API Version key should be a string'
+                'The API Version string has unexpected characters',
+                ''
             );
         }
         $this->APIVersion = $APIVersion;
@@ -167,6 +161,9 @@ class API {
             "X-api-username: {$this->user}",
             "X-APIKey: {$this->APIKey}"
         );
+        if (isset($this->APIVersion)) { $r = array_merge($r, array(
+            'X-API-FUTURE: ' . $this->APIVersion,
+        )); }
         if ($ct === 'json') { $r = array_merge($r, array(
             'Content-Type: application/json',
             'Accept: application/json'
