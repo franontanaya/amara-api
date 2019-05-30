@@ -14,7 +14,7 @@ namespace FranOntanaya\Amara;
  *
  */
 class API {
-    const VERSION = '0.16.1';
+    const VERSION = '0.16.2';
 
     /**
      * Credentials
@@ -157,16 +157,21 @@ class API {
                 gettype($ct)
             );
         }
-        $r = array(
-            "X-api-username: {$this->user}",
-            "X-APIKey: {$this->APIKey}"
-        );
-        if (isset($this->APIVersion)) { $r = array_merge($r, array(
-            'X-API-FUTURE: ' . $this->APIVersion,
-        )); }
+        // API updates, see https://blog.amara.org/2019/04/23/upcoming-amara-api-changes-summer-2019/
+        if ((date('Ymd') >= 20190619) || isset($this->APIVersion) && $this->APIVersion >= 20190619) {
+            $r = array(
+                "x-api-key: {$this->APIKey}",
+                'X-API-FUTURE: ' . $this->APIVersion,
+            );
+        } else {
+            $r = array(
+                "X-api-username: {$this->user}",
+                "X-APIKey: {$this->APIKey}",
+            );
+        }
         if ($ct === 'json') { $r = array_merge($r, array(
             'Content-Type: application/json',
-            'Accept: application/json'
+            'Accept: application/json',
         )); }
         return $r;
     }
