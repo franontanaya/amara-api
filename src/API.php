@@ -355,7 +355,7 @@ class API {
             $url = $this->getResourceUrl($r, $q);
             $response = $this->curl($method, $header, $url, $data);
             $resultChunk = json_decode($response);
-            if (json_last_error() != JSON_ERROR_NONE) {
+            if (json_last_error() !== JSON_ERROR_NONE) {
                 // It's not JSON, just deliver as-is.
                 return $response;
             }
