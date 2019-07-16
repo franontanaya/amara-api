@@ -14,6 +14,7 @@ namespace FranOntanaya\Amara;
  *
  */
 class API {
+
     const VERSION = '0.16.2';
 
     /**
@@ -68,7 +69,7 @@ class API {
      * @param $host
      * @param $user
      * @param $APIKey
-     * @throws \InvalidAPIAccount
+     * @throws \Exception
      */
     function setAccount($host, $user, $APIKey, string $APIVersion = '') {
         $this->validateAccount($host, $user, $APIKey);
@@ -101,6 +102,7 @@ class API {
      *
      * @param array $APIVersion
      * @return bool
+     * @throws \Exception
      */
     function setAPIVersion(string $APIVersion) {
         if (empty($APIVersion)) { return false; }
@@ -122,6 +124,7 @@ class API {
      * @since 0.1.0
      * @param $logger
      * @return bool
+     * @throws \Exception
      */
     function setLogger($logger) {
         if ($logger === null) { $this->logger = null; return false; }
@@ -138,14 +141,14 @@ class API {
     }
 
     // cURL methods
-    
+
     /**
      * Generates headers needed by Amara's API
      *
      * @since 0.1.0
      * @param null $ct
      * @return array
-     * @throws \InvalidAPIAccount
+     * @throws \Exception
      */
     function getHeader($ct = null) {
         assert($this->validateAccount($this->host, $this->user, $this->APIKey));
@@ -490,7 +493,7 @@ class API {
      * @since 0.1.0
      * @param $lang_info
      * @return null
-     * @throws \UnknownException
+     * @throws \Exception
      */
     function getLastVersion($lang_info) {
         if (!is_object($lang_info)) {
@@ -592,8 +595,6 @@ class API {
      * @return array|mixed
      */
     function createVideo(array $r) {
-        $query = array();
-        $data = array();
         if (!isset($r['video_url'], $r['primary_audio_language_code'], $r['team'])) {
             throw new \InvalidArgumentException("Missing arguments");
         }
@@ -1009,6 +1010,7 @@ class API {
      * @param array $r
      * @param null $lang_info
      * @return array|mixed|null
+     * @throws \Exception
      */
     function createTask(array $r, &$lang_info = null) {
         if (!is_object($lang_info)) { $lang_info = null; }
@@ -1615,6 +1617,7 @@ class API {
      * @param $caller
      * @param $expected
      * @param $got
+     * @throws \Exception
      */
     protected function throwException($type, $caller, $expected, $got) {
         switch ($type) {
@@ -1628,7 +1631,7 @@ class API {
                 break;
             default:
                 $message = "Unknown exception. Caller: {$caller}, Expected: {$expected}, Got: {$got}";
-                throw new \UnknownException($message);
+                throw new \Exception($message);
                 break;
         }
 
@@ -1647,7 +1650,8 @@ class API {
      */
     public function log($level, string $message, array $context = array()) {
         if ($this->logger !== null) {
-            $this->logger->log($level, $message, $context);
+            return $this->logger->log($level, $message, $context);
         }
+        return null;
     }
 }
