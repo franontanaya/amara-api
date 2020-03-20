@@ -10,12 +10,12 @@ namespace FranOntanaya\Amara;
  * @author Fran Ontanaya
  * @copyright 2018 Fran Ontanaya
  * @license GPLv3
- * @version 0.16.2
+ * @version 0.17.0
  *
  */
 class API {
 
-    const VERSION = '0.16.2';
+    const VERSION = '0.17.0';
 
     /**
      * Credentials
@@ -242,6 +242,9 @@ class API {
                 $url = "{$this->host}teams/{$r['team']}/members/{$r['user']}/";
                 break;
             case 'users':
+                $url = "{$this->host}users/";
+                break;
+            case 'user':
                 $url = "{$this->host}users/{$r['user']}/";
                 break;
             case 'user_activities':
@@ -1429,7 +1432,7 @@ class API {
      */
     function getUser(array $r) {
         $res = array(
-            'resource' => 'users',
+            'resource' => 'user',
             'content_type' => 'json',
             'user' => $r['user']
        );
@@ -1448,7 +1451,7 @@ class API {
         $result = array();
         for ($i = 0; $i < count($users); $i++) {
             $res = array(
-                'resource' => 'users',
+                'resource' => 'user',
                 'content_type' => 'json',
                 'user' => $users[$i]
            );
@@ -1470,7 +1473,7 @@ class API {
      */
     function getUserActivities(array $r) {
         $res = array(
-            'resource' => 'users',
+            'resource' => 'user',
             'content_type' => 'json',
             'user' => $r['user'],
             'type'=> $r['type'],
