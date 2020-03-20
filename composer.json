@@ -9,7 +9,10 @@
             "email": "email@franontanaya.org"
         }
     ],
-    "require": {},
+    "require": {
+        "ext-curl": ">=5.4.0",
+        "ext-json": ">=5.4.0"
+    },
     "require-dev": {},
     "minimum-stability": "dev",
     "autoload": {
