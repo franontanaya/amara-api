@@ -10,12 +10,12 @@ namespace FranOntanaya\Amara;
  * @author Fran Ontanaya
  * @copyright 2018 Fran Ontanaya
  * @license GPLv3
- * @version 0.17.0
+ * @version 0.18.0
  *
  */
 class API {
 
-    const VERSION = '0.17.0';
+    const VERSION = '0.18.0';
 
     /**
      * Credentials
@@ -322,7 +322,8 @@ class API {
     /**
      * cURL retry loop
      *
-     * Exhaust all retries for HTTP actions.
+     * Executes the request and retries on failure after a while for some temporary issues
+     * 429 API quota errors reset every minute.
      *
      * @since 0.1.0
      * @param $cr
@@ -331,9 +332,23 @@ class API {
     protected function curlTry($cr) {
         $retries = 0;
         do {
+            $retry = false;
             $result = curl_exec($cr);
+            if ($result === false) {
+                $retry = true;
+            } else {
+                $HTTPStatus = curl_getinfo($cr, CURLINFO_HTTP_CODE);
+                echo "Result: ", $HTTPStatus, "\n";
+                switch ($HTTPStatus) {
+                    case '429': // Too many requests (hit the API quota)
+                    case '504': // Gateway timeout (server couldn't reply)
+                        $retry = true;
+                        sleep(30 * ($retries + 1)); // wait for 30 seconds longer on each retry
+                        break;
+                }
+            }
             $retries++; if ($retries > $this->retries) { return null; }
-        } while($result === false);
+        } while($retry);
         return $result;
     }
 
@@ -1480,6 +1495,29 @@ class API {
         );
         return $this->getResource($res);
     }
+
+
+    /**
+     * Create user
+     *
+     * @since 0.18.0
+     * @param array $r
+     * @return array|mixed
+     */
+    function createUser(array $r) {
+        $res = array(
+            'resource' => 'users',
+            'content_type' => 'json',
+        );
+        $query = array();
+        $data = array(
+            'username' => $r['username'],
+            'email' => $r['email'],
+            'create_login_token' => true
+        );
+        return $this->createResource($res, $query, $data);
+    }
+
 
     // TEAM APPLICATIONS
     // http://amara.readthedocs.io/en/old-api-docs/api.html#team-applications-resource
