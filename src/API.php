@@ -10,12 +10,12 @@ namespace FranOntanaya\Amara;
  * @author Fran Ontanaya
  * @copyright 2018 Fran Ontanaya
  * @license GPLv3
- * @version 0.18.0
+ * @version 0.18.1
  *
  */
 class API {
 
-    const VERSION = '0.18.0';
+    const VERSION = '0.18.1';
 
     /**
      * Credentials
@@ -300,8 +300,7 @@ class API {
             case 'GET':
                 break;
             case 'POST':
-        		curl_setopt( $cr, CURLOPT_POST, 1 ); // Needed when creating a new language
-                //curl_setopt($cr, CURLOPT_CUSTOMREQUEST, $mode);
+        		curl_setopt($cr, CURLOPT_POST, 1);
                 curl_setopt($cr, CURLOPT_POSTFIELDS, $data);
                 break;
             case 'PUT':
