@@ -10,12 +10,12 @@ namespace FranOntanaya\Amara;
  * @author Fran Ontanaya
  * @copyright 2018 Fran Ontanaya
  * @license GPLv3
- * @version 0.18.1
+ * @version 0.18.2
  *
  */
 class API {
 
-    const VERSION = '0.18.1';
+    const VERSION = '0.18.2';
 
     /**
      * Credentials
@@ -337,7 +337,6 @@ class API {
                 $retry = true;
             } else {
                 $HTTPStatus = curl_getinfo($cr, CURLINFO_HTTP_CODE);
-                echo "Result: ", $HTTPStatus, "\n";
                 switch ($HTTPStatus) {
                     case '429': // Too many requests (hit the API quota)
                     case '504': // Gateway timeout (server couldn't reply)
