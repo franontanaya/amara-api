@@ -10,12 +10,12 @@ namespace FranOntanaya\Amara;
  * @author Fran Ontanaya
  * @copyright 2018 Fran Ontanaya
  * @license GPLv3
- * @version 0.18.2
+ * @version 0.19.1
  *
  */
 class API {
 
-    const VERSION = '0.18.2';
+    const VERSION = '0.19.1';
 
     /**
      * Credentials
@@ -42,12 +42,14 @@ class API {
      * Settings
      *
      * $limit: number of records per request. Keep low to avoid timeouts.
+     * $cookie: in case the API point requires a session
      *
      * @since 0.1.0
     */
     public $retries = 10;
     public $limit = 10;
     public $verboseCurl = false;
+    public $cookie = null;
 
     /**
      * Initialization
@@ -176,6 +178,9 @@ class API {
             'Content-Type: application/json',
             'Accept: application/json',
         )); }
+        if ($this->cookie !== null) {
+            $r = array_merge($r, $this->cookie);
+        }
         return $r;
     }
 
@@ -225,6 +230,9 @@ class API {
                 break;
             case 'subtitles':
                 $url = "{$this->host}videos/{$r['video_id']}/languages/{$r['language']}/subtitles/";
+                break;
+            case 'notes':
+                $url = "{$this->host}videos/{$r['video_id']}/languages/{$r['language']}/subtitles/notes/";
                 break;
             case 'tasks':
                 $url = "{$this->host}teams/{$r['team']}/tasks/";
@@ -335,6 +343,7 @@ class API {
             $result = curl_exec($cr);
             if ($result === false) {
                 $retry = true;
+                sleep(30 * ($retries + 1));
             } else {
                 $HTTPStatus = curl_getinfo($cr, CURLINFO_HTTP_CODE);
                 switch ($HTTPStatus) {
@@ -1118,7 +1127,7 @@ class API {
             'team' => $r['team']
         );
         $query = array(
-            'state' => isset($r['state']) ? $r['state'] : null,
+            'work_status' => isset($r['state']) ? $r['state'] : null,
             'video' => isset($r['video_id']) ? $r['video_id'] : null,
             'language' => isset($r['language_code']) ? $r['language_code'] : null,
             'video_language' => isset($r['video_language']) ? $r['video_language'] : null,
@@ -1200,7 +1209,7 @@ class API {
         if (isset($r['subtitler'])) { $data['subtitler'] = $r['subtitler']; }
         if (isset($r['reviewer'])) { $data['reviewer'] = $r['reviewer']; }
         if (isset($r['approver'])) { $data['approver'] = $r['approver']; }
-        if (isset($r['state'])) { $data['state'] = $r['state']; }
+        if (isset($r['work_status'])) { $data['state'] = $r['state']; }
         if (isset($r['work_team'])) { $data['team'] = $r['work_team']; }
         if (isset($r['evaluation_teams'])) { $data['evaluation_teams'] = $r['evaluation_teams']; }
         return $this->setResource($res, $query, $data);
@@ -1317,6 +1326,22 @@ class API {
         }
         if (isset($r['action'])) { $data['action'] = $r['action']; }
         return $this->createResource($res, $query, $data);
+    }
+
+    // SUBTITLE NOTES RESOURCE
+    // https://apidocs.amara.org/#fetch-notes
+    function getNotes(array $r) {
+        $res = array(
+            'resource' => 'notes',
+            'video_id' => $r['video_id'],
+            'language' => $r['language_code'],
+            'content_type' => 'json',
+        );
+        $query = array(
+            'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
+            'offset' => isset($r['offset']) ? $r['offset'] : 0
+        );
+        return $this->getResource($res, $query);
     }
 
     // TEAM MEMBER RESOURCE
