@@ -15,7 +15,7 @@ namespace FranOntanaya\Amara;
  */
 class API {
 
-    const VERSION = '0.19.1';
+    const VERSION = '0.19.2';
 
     /**
      * Credentials
@@ -47,7 +47,7 @@ class API {
      * @since 0.1.0
     */
     public $retries = 10;
-    public $limit = 10;
+    public $limit = 100;
     public $verboseCurl = false;
     public $cookie = null;
 
@@ -1209,7 +1209,7 @@ class API {
         if (isset($r['subtitler'])) { $data['subtitler'] = $r['subtitler']; }
         if (isset($r['reviewer'])) { $data['reviewer'] = $r['reviewer']; }
         if (isset($r['approver'])) { $data['approver'] = $r['approver']; }
-        if (isset($r['work_status'])) { $data['state'] = $r['state']; }
+        if (isset($r['state'])) { $data['state'] = $r['state']; }
         if (isset($r['work_team'])) { $data['team'] = $r['work_team']; }
         if (isset($r['evaluation_teams'])) { $data['evaluation_teams'] = $r['evaluation_teams']; }
         return $this->setResource($res, $query, $data);
