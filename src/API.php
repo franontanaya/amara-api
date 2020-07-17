@@ -8,9 +8,9 @@ namespace FranOntanaya\Amara;
  * with Amara.org's API.
  *
  * @author Fran Ontanaya
- * @copyright 2018 Fran Ontanaya
+ * @copyright 2020 Fran Ontanaya
  * @license GPLv3
- * @version 0.19.1
+ * @version 0.19.2
  *
  */
 class API {
