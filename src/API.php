@@ -476,8 +476,12 @@ class API {
             'resource' => 'languages',
             'content_type' => 'json',
             'video_id' => $r['video_id'],
-       );
-        return $this->getResource($res);
+        );
+        $query = array(
+            'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
+            'offset' => isset($r['offset']) ? $r['offset'] : 0
+        );
+        return $this->getResource($res, $query);
     }
 
     /**
@@ -748,7 +752,10 @@ class API {
             'content_type' => 'json',
             'video_id' => $r['video_id'],
         );
-        $query = array();
+        $query = array(
+            'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
+            'offset' => isset($r['offset']) ? $r['offset'] : 0
+        );
         return $this->getResource($res, $query);
     }
 
@@ -853,7 +860,10 @@ class API {
             'team' => $r['team'],
             'content_type' => 'json'
         );
-        $query = array();
+        $query = array(
+            'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
+            'offset' => isset($r['offset']) ? $r['offset'] : 0
+        );
         return $this->getResource($res, $query);
     }
 
@@ -865,7 +875,7 @@ class API {
      */
     function getProject(array $r = array()) {
         $res = array(
-            'resource' => 'projects',
+            'resource' => 'project',
             'team' => $r['team'],
             'project' => $r['project'],
             'content_type' => 'json'
@@ -1134,7 +1144,10 @@ class API {
             'project' => isset($r['project']) ? $r['project'] : null,
             'assignee' => isset($r['assignee']) ? $r['assignee'] : null,
             'type' => isset($r['type']) ? $r['type'] : null,
+            'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
+            'offset' => isset($r['offset']) ? $r['offset'] : 0,
         );
+
         $filter = null;
         if (isset($r['filter'])) {
             if (!is_callable($r['filter'])) {
@@ -1359,11 +1372,11 @@ class API {
             'resource' => 'members',
             'content_type' => 'json',
             'team' => $r['team']
-       );
+        );
         $query = array(
             'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
             'offset' => isset($r['offset']) ? $r['offset'] : 0
-       );
+        );
         return $this->getResource($res, $query);
     }
 
@@ -1492,7 +1505,7 @@ class API {
                 'resource' => 'user',
                 'content_type' => 'json',
                 'user' => $users[$i]
-           );
+            );
             $user = $this->getResource($res);
             if (!is_object($user)) {
                 continue;
@@ -1516,7 +1529,11 @@ class API {
             'user' => $r['user'],
             'type'=> $r['type'],
         );
-        return $this->getResource($res);
+        $query = array(
+            'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
+            'offset' => isset($r['offset']) ? $r['offset'] : 0
+        );
+        return $this->getResource($res, $query);
     }
 
 
@@ -1664,6 +1681,7 @@ class API {
     /**
      * Check if a string is a valid language code
      *
+     * @todo: add some language codes supported by Amara since
      * @since 0.3.0
      * @param $languageCode
      * @return bool
