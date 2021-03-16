@@ -10,12 +10,12 @@ namespace FranOntanaya\Amara;
  * @author Fran Ontanaya
  * @copyright 2020 Fran Ontanaya
  * @license GPLv3
- * @version 0.19.2
+ * @version 0.21.0
  *
  */
 class API {
 
-    const VERSION = '0.19.2';
+    const VERSION = '0.21.0';
 
     /**
      * Credentials
@@ -1136,8 +1136,9 @@ class API {
             'content_type' => 'json',
             'team' => $r['team']
         );
+        if (isset($r['state'])) { $r['work_status'] = $r['state']; } // API transition
         $query = array(
-            'work_status' => isset($r['state']) ? $r['state'] : null,
+            'work_status' => isset($r['work_status']) ? $r['work_status'] : null,
             'video' => isset($r['video_id']) ? $r['video_id'] : null,
             'language' => isset($r['language_code']) ? $r['language_code'] : null,
             'video_language' => isset($r['video_language']) ? $r['video_language'] : null,
@@ -1146,6 +1147,7 @@ class API {
             'type' => isset($r['type']) ? $r['type'] : null,
             'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
             'offset' => isset($r['offset']) ? $r['offset'] : 0,
+            'sort' => isset($r['sort']) ? $r['sort'] : null,
         );
 
         $filter = null;
@@ -1219,13 +1221,32 @@ class API {
         );
         $query = array();
         $data = array();
+        if (isset($r['state'])) { $r['work_status'] = $r['state']; } // API transition
         if (isset($r['subtitler'])) { $data['subtitler'] = $r['subtitler']; }
         if (isset($r['reviewer'])) { $data['reviewer'] = $r['reviewer']; }
         if (isset($r['approver'])) { $data['approver'] = $r['approver']; }
-        if (isset($r['state'])) { $data['state'] = $r['state']; }
+        if (isset($r['work_status'])) { $data['work_status'] = $r['work_status']; }
         if (isset($r['work_team'])) { $data['team'] = $r['work_team']; }
         if (isset($r['evaluation_teams'])) { $data['evaluation_teams'] = $r['evaluation_teams']; }
         return $this->setResource($res, $query, $data);
+    }
+
+    /**
+     * Delete a collaboration request
+     *
+     * @param array $r
+     * @return array|mixed
+     */
+    function deleteRequest(array $r) {
+        $res = array(
+            'resource' => 'subtitle_request',
+            'team' => $r['team'],
+            'job_id' => $r['job_id'],
+            'content_type' => 'json'
+        );
+        $query = array();
+        $data = array();
+        return $this->deleteResource($res, $query, $data);
     }
 
     // PRO REQUESTS RESOURCE
@@ -1355,6 +1376,29 @@ class API {
             'offset' => isset($r['offset']) ? $r['offset'] : 0
         );
         return $this->getResource($res, $query);
+    }
+
+    /**
+     * Add a subtitles note to the given video and language.
+     *
+     * @param array $r
+     * @return array|mixed
+     */
+    function createNote(array $r) {
+        $res = array(
+            'resource' => 'notes',
+            'video_id' => $r['video_id'],
+            'language' => $r['language_code'],
+            'content_type' => 'json',
+        );
+        $query = array(
+            'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
+            'offset' => isset($r['offset']) ? $r['offset'] : 0
+        );
+        $data = array(
+            'body' => isset($r['body']) ? $r['body'] : null,
+        );
+        return $this->createResource($res, $query, $data);
     }
 
     // TEAM MEMBER RESOURCE
