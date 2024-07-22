@@ -10,12 +10,12 @@ namespace FranOntanaya\Amara;
  * @author Fran Ontanaya
  * @copyright 2020 Fran Ontanaya
  * @license GPLv3
- * @version 0.21.0
+ * @version 0.22.0
  *
  */
 class API {
 
-    const VERSION = '0.21.0';
+    const VERSION = '0.22.1';
 
     /**
      * Credentials
@@ -420,7 +420,7 @@ class API {
      * @param null $data
      * @return array|mixed
      */
-    protected function getResource(array $r, $q = null, $data = null, callable $filter = null) {
+    public function getResource(array $r, $q = null, $data = null, callable $filter = null) {
         return $this->useResource('GET', $r, $q, $data, $filter);
     }
 
@@ -505,8 +505,30 @@ class API {
             'content_type' => 'json',
             'video_id' => $r['video_id'],
             'language' => $r['language_code']
-       );
+        );
         return $this->getResource($res);
+    }
+
+    /**
+     * Enable a language on a video
+     *
+     *
+     * @since 0.22.0
+     * @param array $r
+     * @return array|mixed|null
+     */
+    function createVideoLanguage(array $r) {
+        if (!$this->isValidVideoID($r['video_id'])) { return null; }
+        $res = [
+            'resource' => 'languages',
+            'content_type' => 'json',
+            'video_id' => $r['video_id'],
+        ];
+        $q = [];
+        $data = [
+            'language_code' => $r['language_code'],
+        ];
+        return $this->createResource($res, $q, $data);
     }
 
     /**
@@ -624,9 +646,9 @@ class API {
      * @return array|mixed
      */
     function createVideo(array $r) {
-        if (!isset($r['video_url'], $r['primary_audio_language_code'], $r['team'])) {
-            throw new \InvalidArgumentException("Missing arguments");
-        }
+        //if (!isset($r['video_url'], $r['primary_audio_language_code'], $r['team'])) {
+        //    throw new \InvalidArgumentException("Missing arguments");
+        //}
         $res = array(
                 'resource' => 'videos',
                 'content_type' => 'json'
@@ -1139,6 +1161,7 @@ class API {
         if (isset($r['state'])) { $r['work_status'] = $r['state']; } // API transition
         $query = array(
             'work_status' => isset($r['work_status']) ? $r['work_status'] : null,
+            'status' => isset($r['status']) ? $r['status'] : null,
             'video' => isset($r['video_id']) ? $r['video_id'] : null,
             'language' => isset($r['language_code']) ? $r['language_code'] : null,
             'video_language' => isset($r['video_language']) ? $r['video_language'] : null,
@@ -1415,7 +1438,7 @@ class API {
         $res = array(
             'resource' => 'members',
             'content_type' => 'json',
-            'team' => $r['team']
+            'team' => $r['team'],
         );
         $query = array(
             'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
