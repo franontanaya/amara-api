@@ -8,14 +8,13 @@ namespace FranOntanaya\Amara;
  * with Amara.org's API.
  *
  * @author Fran Ontanaya
- * @copyright 2020 Fran Ontanaya
+ * @copyright 2024 Fran Ontanaya
  * @license GPLv3
- * @version 0.22.0
  *
  */
 class API {
 
-    const VERSION = '0.22.1';
+    const VERSION = '0.23.0';
 
     /**
      * Credentials
@@ -162,18 +161,10 @@ class API {
                 gettype($ct)
             );
         }
-        // API updates, see https://blog.amara.org/2019/04/23/upcoming-amara-api-changes-summer-2019/
-        if ((date('Ymd') >= 20190619) || isset($this->APIVersion) && $this->APIVersion >= 20190619) {
-            $r = array(
-                "x-api-key: {$this->APIKey}",
-                'X-API-FUTURE: ' . $this->APIVersion,
-            );
-        } else {
-            $r = array(
-                "X-api-username: {$this->user}",
-                "X-APIKey: {$this->APIKey}",
-            );
-        }
+        $r = array(
+            "x-api-key: {$this->APIKey}",
+            'X-API-FUTURE: ' . $this->APIVersion,
+        );
         if ($ct === 'json') { $r = array_merge($r, array(
             'Content-Type: application/json',
             'Accept: application/json',
@@ -953,7 +944,14 @@ class API {
             'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
             'offset' => isset($r['offset']) ? $r['offset'] : 0
         );
-        return $this->getResource($res, $query);
+        $filter = null;
+        if (isset($r['filter'])) {
+            if (!is_callable($r['filter'])) {
+                throw new \UnexpectedValueException('The \'filter\' argument is not a callable function.');
+            }
+            $filter = $r['filter'];
+        };
+        return $this->getResource($res, $query, null, $filter);
     }
 
     /**
@@ -976,8 +974,15 @@ class API {
             'after' => isset($r['after']) ? $r['after'] : null,
             'limit' => isset($r['limit']) ? $r['limit'] : $this->limit,
             'offset' => isset($r['offset']) ? $r['offset'] : 0
-       );
-        return $this->getResource($res, $query);
+        );
+        $filter = null;
+        if (isset($r['filter'])) {
+            if (!is_callable($r['filter'])) {
+                throw new \UnexpectedValueException('The \'filter\' argument is not a callable function.');
+            }
+            $filter = $r['filter'];
+        };
+        return $this->getResource($res, $query,null, $filter);
     }
 
     /**
